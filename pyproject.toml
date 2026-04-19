@@ -21,8 +21,8 @@ dependencies = []
 akademiks = "akademiks.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/your-username/akademiks-urtt"
-Issues = "https://github.com/your-username/akademiks-urtt/issues"
+Homepage = "https://github.com/cotafei/akademiks-urtt"
+Issues = "https://github.com/cotafei/akademiks-urtt/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
