@@ -6,7 +6,7 @@ from datetime import date, timezone
 from .utils import to_utc_iso
 
 API_BASE = "https://akademiks.urtt.ru/api/trpc"
-_UA = "akademiks-urtt/1.0 (github.com/cotfei/akademiks-urtt)"
+_UA = "akademiks-urtt/1.0 (github.com/cotafei/akademiks-urtt)"
 
 
 def _get(url: str, timeout: int = 15) -> dict:
