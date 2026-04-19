@@ -1,10 +1,13 @@
 """
 Weekly sync example — save schedule as Markdown + ICS to a folder.
 Run every Monday (e.g. via cron or Task Scheduler).
+Run: python examples/weekly_sync.py  (from project root)
 """
 
-from datetime import date
+import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from akademiks import fetch_schedule, format_markdown, format_ics, week_monday
 
 GROUP = "is-228"

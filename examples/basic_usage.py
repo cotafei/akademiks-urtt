@@ -1,8 +1,12 @@
 """
 Basic usage example — fetch and print schedule for a group.
+Run: python examples/basic_usage.py  (from project root)
 """
 
-from datetime import date
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from akademiks import fetch_schedule, format_markdown, week_monday
 
 group = "is-228"
