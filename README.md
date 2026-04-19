@@ -1,54 +1,72 @@
 # akademiks-urtt
 
-Python client and CLI for the **[Akademiks URTK](https://akademiks.urtt.ru)** schedule API.
+Python-клиент и CLI для получения расписания через **[Akademiks УРТК](https://akademiks.urtt.ru)**.
 
-Works for **any group** at URTK (Uralsky Radio-Technical College). Zero dependencies — pure stdlib.
+Работает для **любой группы** Уральского радиотехнического колледжа. Никаких зависимостей — только стандартная библиотека Python.
 
-## Install
+---
+
+## Для кого и зачем
+
+Сайт akademiks.urtt.ru неудобен: нельзя экспортировать расписание, нет API-документации, интерфейс сделан под мышку. Этот инструмент решает проблему:
+
+- **Студенты** — получают расписание в Markdown, импортируют в Notion/Obsidian или в телефонный календарь через `.ics`
+- **Разработчики** — используют как библиотеку в своих ботах, автоматизациях, приложениях
+- **Все группы УРТК** — не только ИС-228, работает с любой группой колледжа
+
+---
+
+## Установка
 
 ```bash
 pip install akademiks-urtt
 ```
 
-Or from source:
+Или из исходников:
 
 ```bash
-git clone https://github.com/your-username/akademiks-urtt
+git clone https://github.com/cotafei/akademiks-urtt
 cd akademiks-urtt
 pip install -e .
 ```
 
-## CLI
+**Требования:** Python 3.10+, интернет-соединение. Больше ничего.
+
+---
+
+## CLI — быстрый старт
 
 ```bash
-# Show schedule for current week
+# Расписание на текущую неделю
 akademiks --group is-228
 
-# Specific week
+# Конкретная неделя
 akademiks --group is-228 --week 2026-04-14
 
-# Save to folder (Markdown + ICS)
-akademiks --group is-228 --out ./output --ics
+# Сохранить в папку (Markdown + ICS для Apple/Google Calendar)
+akademiks --group is-228 --out ./расписание --ics
 
-# JSON output
+# Вывод в JSON
 akademiks --group is-228 --format json
 
-# List all groups
+# Список всех групп УРТК
 akademiks --groups
 ```
 
-### Options
+### Все параметры
 
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--group`, `-g` | required | Group ID, e.g. `is-228` |
-| `--week`, `-w` | current week | Any date in the target week (`YYYY-MM-DD`) |
-| `--format`, `-f` | `markdown` | Output format: `markdown`, `ics`, `json` |
-| `--out`, `-o` | stdout | Directory to save output files |
-| `--ics` | off | Also export `.ics` when format is `markdown` |
-| `--tz-offset` | `5` | UTC offset in hours (default: Yekaterinburg UTC+5) |
-| `--tz-name` | `Asia/Yekaterinburg` | IANA timezone name for ICS headers |
-| `--groups` | — | List all available groups |
+| Флаг | По умолчанию | Описание |
+|------|-------------|----------|
+| `--group`, `-g` | обязательный | ID группы, например `is-228` |
+| `--week`, `-w` | текущая неделя | Любая дата нужной недели (`YYYY-MM-DD`) |
+| `--format`, `-f` | `markdown` | Формат вывода: `markdown`, `ics`, `json` |
+| `--out`, `-o` | вывод в терминал | Папка для сохранения файлов |
+| `--ics` | выключен | Также экспортировать `.ics` при формате `markdown` |
+| `--tz-offset` | `5` | Сдвиг UTC в часах (по умолчанию Екатеринбург UTC+5) |
+| `--tz-name` | `Asia/Yekaterinburg` | Имя часового пояса для заголовков ICS |
+| `--groups` | — | Показать все группы УРТК |
+
+---
 
 ## Python API
 
@@ -58,21 +76,21 @@ from akademiks import fetch_schedule, fetch_groups
 from akademiks import format_markdown, format_ics, format_json
 from akademiks import week_monday
 
-# Fetch schedule
-monday = week_monday()                    # Monday of current week
-days = fetch_schedule(monday, "is-228")   # list of day dicts
+# Получить расписание
+monday = week_monday()                    # понедельник текущей недели
+days = fetch_schedule(monday, "is-228")   # список дней
 
-# Format
+# Форматировать
 md  = format_markdown(days, monday, "is-228")
 ics = format_ics(days, "is-228")
 js  = format_json(days, monday, "is-228")
 
-# List all groups
+# Все группы
 groups = fetch_groups()
 # [{"id": "is-228", "title": "ИС-228"}, ...]
 ```
 
-### Custom timezone
+### Другой часовой пояс
 
 ```python
 from datetime import timezone, timedelta
@@ -80,13 +98,15 @@ from akademiks import fetch_schedule, format_markdown, week_monday
 
 tz_moscow = timezone(timedelta(hours=3))
 monday = week_monday()
-days = fetch_schedule(monday, "is-228", tz=tz_moscow)
-md = format_markdown(days, monday, "is-228", tz=tz_moscow)
+days = fetch_schedule(monday, "it-101", tz=tz_moscow)
+md = format_markdown(days, monday, "it-101", tz=tz_moscow)
 ```
 
-## Data structure
+---
 
-`fetch_schedule()` returns a list of day objects:
+## Структура данных
+
+`fetch_schedule()` возвращает список объектов-дней:
 
 ```json
 [
@@ -108,9 +128,13 @@ md = format_markdown(days, monday, "is-228", tz=tz_moscow)
 ]
 ```
 
-## Automating with Task Scheduler (Windows)
+---
 
-Save `examples/weekly_sync.py`, then in PowerShell (as admin):
+## Автосинхронизация
+
+### Windows (Task Scheduler)
+
+Сохрани `examples/weekly_sync.py`, затем в PowerShell (от администратора):
 
 ```powershell
 schtasks /Create /F /TN "AkademiksSync" `
@@ -118,18 +142,22 @@ schtasks /Create /F /TN "AkademiksSync" `
   /SC WEEKLY /D MON /ST 07:00
 ```
 
-## Automating with cron (Linux/macOS)
+### Linux / macOS (cron)
 
 ```cron
 0 7 * * 1 /usr/bin/python3 /path/to/weekly_sync.py
 ```
 
-## Notes
+---
 
-- The Akademiks `schedule.get` and `groups.get` endpoints require **no authentication**.
-- Timezone defaults to **UTC+5 (Yekaterinburg)**. Use `--tz-offset` to override for other regions.
-- Requires Python **3.10+** (uses `date | None` union syntax).
+## Заметки
 
-## License
+- Эндпоинты `schedule.get` и `groups.get` работают **без авторизации** — официальный публичный API.
+- По умолчанию часовой пояс **UTC+5 (Екатеринбург)**. Для других городов используй `--tz-offset`.
+- Требуется Python **3.10+**.
+
+---
+
+## Лицензия
 
 MIT
